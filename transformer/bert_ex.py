@@ -6,7 +6,7 @@ tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 model = BertForMaskedLM.from_pretrained("bert-base-uncased")
 
 # 2. Input sentence with a masked token
-sentence = "The capital of France is [MASK]."
+sentence = "The capital of India is [MASK]."
 
 # 3. Tokenize the input
 inputs = tokenizer(sentence, return_tensors="pt")
