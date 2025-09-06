@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 # ----------------------------
-# Positional Encoding
+# Positional Encoding FOR ORIG
 # ----------------------------
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
