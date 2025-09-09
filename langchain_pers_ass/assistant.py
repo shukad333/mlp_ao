@@ -1,22 +1,23 @@
 import streamlit as st
-from langchain.llms import HuggingFacePipeline
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.document_loaders import TextLoader
+from langchain_community.llms import HuggingFacePipeline
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from transformers import pipeline
 import os
 
-# Setup Hugging Face local model
+# Setup lightweight Hugging Face model
 local_pipeline = pipeline(
     "text-generation",
-    model="EleutherAI/gpt-neo-2.7B",  # Open-source model
-    device=0 if os.environ.get('USE_GPU') else -1,  # Use GPU if available
+    model="gpt2",  # Lightweight for local usage
+    device=0 if os.environ.get('USE_GPU') else -1,
     do_sample=True,
     max_length=512
 )
+
 llm = HuggingFacePipeline(pipeline=local_pipeline)
 
 # Load documents and build vector store
@@ -33,7 +34,7 @@ vector_store = FAISS.from_documents(chunks, embeddings)
 # Memory for conversation
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-# Build the conversational chain
+# Conversational QA chain
 qa_chain = ConversationalRetrievalChain.from_llm(
     llm=llm,
     retriever=vector_store.as_retriever(),
@@ -57,10 +58,11 @@ if "history" not in st.session_state:
 query = st.text_input("Ask me anything:")
 
 if st.button("Send"):
-    if any(op in query for op in ['+', '-', '*', '/']):
-        answer = calculator_tool(query)
-    else:
-        answer = qa_chain.run(query)
+    with st.spinner("Processing... Please wait"):
+        if any(op in query for op in ['+', '-', '*', '/']):
+            answer = calculator_tool(query)
+        else:
+            answer = qa_chain.run(query)
 
     st.session_state.history.append((query, answer))
 
