@@ -6,18 +6,22 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import os
 
-# Setup lightweight Hugging Face model
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+
 local_pipeline = pipeline(
     "text-generation",
-    model="gpt2",  # Lightweight for local usage
+    model=model,
+    tokenizer=tokenizer,
     device=0 if os.environ.get('USE_GPU') else -1,
     do_sample=True,
-    max_length=512
+    max_new_tokens=150
 )
 
+from langchain_community.llms import HuggingFacePipeline
 llm = HuggingFacePipeline(pipeline=local_pipeline)
 
 # Load documents and build vector store
